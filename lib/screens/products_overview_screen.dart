@@ -2,16 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/products.dart';
-import '../widgets/product_grid.dart';  
+import '../widgets/product_grid.dart';
+import '../widgets/badge.dart.dart';
+import '../models/cart.dart';
 
-
-enum FilterOptions {
-  Favorites,
-  All
-}
+enum FilterOptions { Favorites, All }
 
 class ProductsOverviewScreen extends StatefulWidget {
-  
   @override
   _ProductsOverviewScreenState createState() => _ProductsOverviewScreenState();
 }
@@ -21,7 +18,6 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text('MyShop'),
@@ -29,15 +25,14 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
           PopupMenuButton(
             onSelected: (FilterOptions selectedValue) {
               setState(() {
-               if (selectedValue == FilterOptions.Favorites) {
+                if (selectedValue == FilterOptions.Favorites) {
                   //productsContainer.showFavoritesOnly();
                   _showOnlyFavorites = true;
-               } else {
+                } else {
                   //productsContainer.showAll();
                   _showOnlyFavorites = false;
-               } 
+                }
               });
-               
             },
             icon: Icon(Icons.more_vert),
             itemBuilder: (_) => [
@@ -47,13 +42,25 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
               ),
               PopupMenuItem(
                 child: Text('Show All'),
-                value: FilterOptions.All ,
+                value: FilterOptions.All,
               )
             ],
-          )
+          ),
+          Consumer<Cart>(
+            builder: (_, cart, ch) => Badge(
+              child: ch,
+              value: cart.itemCount.toString(),
+            ),
+            child: IconButton(
+              icon: Icon(
+                Icons.shopping_cart,
+              ),
+              onPressed: () {},
+            ),
+          ),
         ],
       ),
-      body: ProductGrid(_showOnlyFavorites) ,
+      body: ProductGrid(_showOnlyFavorites),
     );
   }
 }
