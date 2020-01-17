@@ -92,6 +92,9 @@ class Products with ChangeNotifier {
       notifyListeners();
 
       return Future.value();
+    }).catchError((error) {
+      print(error);
+      throw error;
     });
 
 
