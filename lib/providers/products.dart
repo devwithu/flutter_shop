@@ -1,5 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import '../models/product.dart';
+import 'package:http/http.dart' as http;
+import 'package:convert/convert.dart';
+
 
 class Products with ChangeNotifier {
   List<Product> _items = [
@@ -63,18 +68,32 @@ class Products with ChangeNotifier {
 
   addProduct(Product product) {
 
-    final newProduct = Product(
-      title: product.title,
-      description:  product.description,
-      price: product.price,
-      imageUrl: product.imageUrl,
-      id: DateTime.now().toString(),
-    );
+    const url = 'https://atable-97192.firebaseio.com/products.json';
+    http.post(url, body: json.encode({
+      'title' : product.title,
+      'description' : product.description,
+      'imageUrl' : product.imageUrl,
+      'price' : product.price,
+      'isFavorite' : product.isFavorite,
+    }),
+    ).then((response) {
+      print(json.decode(response.body));
 
-    _items.add(newProduct);
-    //_items.insert(0, newProduct);
+      final newProduct = Product(
+        title: product.title,
+        description:  product.description,
+        price: product.price,
+        imageUrl: product.imageUrl,
+        id: json.decode(response.body)['name'],
+      );
+      _items.add(newProduct);
+      //_items.insert(0, newProduct);
 
-    notifyListeners();
+      notifyListeners();
+    });
+
+
+
   }
 
   void updateProduct(String id, Product newProduct) {
