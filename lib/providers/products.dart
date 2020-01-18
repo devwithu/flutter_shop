@@ -5,7 +5,6 @@ import '../models/product.dart';
 import 'package:http/http.dart' as http;
 import 'package:convert/convert.dart';
 
-
 class Products with ChangeNotifier {
   List<Product> _items = [
 //    Product(
@@ -50,7 +49,7 @@ class Products with ChangeNotifier {
   // }
   // void showAll() {
   //   _showFavoritesOnly = false;
-  //   notifyListeners(); 
+  //   notifyListeners();
   // }
   List<Product> get items {
     // if (_showFavoritesOnly) {
@@ -62,10 +61,10 @@ class Products with ChangeNotifier {
   List<Product> get favoriteItems {
     return items.where((prodItem) => prodItem.isFavorite).toList();
   }
-  Product findById(String id) {
-    return _items.firstWhere( (prod) => prod.id == id );
-  }
 
+  Product findById(String id) {
+    return _items.firstWhere((prod) => prod.id == id);
+  }
 
   Future<void> fetchAndSetProducts() async {
     const url = 'https://atable-97192.firebaseio.com/products.json';
@@ -86,28 +85,28 @@ class Products with ChangeNotifier {
       });
       _items = loadedProducts;
       notifyListeners();
-
     } catch (error) {
       throw (error);
     }
   }
 
   Future<void> addProduct(Product product) async {
-
     const url = 'https://atable-97192.firebaseio.com/products.json';
     try {
-      final response = await http.post(url, body: json.encode({
-        'title': product.title,
-        'description': product.description,
-        'imageUrl': product.imageUrl,
-        'price': product.price,
-        'isFavorite': product.isFavorite,
-      }),
+      final response = await http.post(
+        url,
+        body: json.encode({
+          'title': product.title,
+          'description': product.description,
+          'imageUrl': product.imageUrl,
+          'price': product.price,
+          'isFavorite': product.isFavorite,
+        }),
       );
 
       final newProduct = Product(
         title: product.title,
-        description:  product.description,
+        description: product.description,
         price: product.price,
         imageUrl: product.imageUrl,
         id: json.decode(response.body)['name'],
@@ -116,35 +115,47 @@ class Products with ChangeNotifier {
       //_items.insert(0, newProduct);
 
       notifyListeners();
-
-
-    } catch(error){
-
-
+    } catch (error) {
       print(error);
       throw error;
     }
-
-
-
-
-
-
   }
 
-  void updateProduct(String id, Product newProduct) {
+  Future<void> updateProduct(String id, Product newProduct) async {
     final prodIndex = _items.indexWhere((prod) => prod.id == id);
     if (prodIndex >= 0) {
+      final url = 'https://atable-97192.firebaseio.com/products/$id.json';
+      await http.patch(url,
+          body: json.encode({
+            'title': newProduct.title,
+            'description': newProduct.description,
+            'price': newProduct.price,
+            'imageUrl': newProduct.imageUrl,
+            //'isFavorite' : newProduct.isFavorite,
+          }));
       _items[prodIndex] = newProduct;
       notifyListeners();
     } else {
-       print('...');
+      print('...');
     }
-
   }
 
   void deleteProduct(String id) {
-    _items.removeWhere((prod) => prod.id == id);
+    final url = 'https://atable-97192.firebaseio.com/products/$id.json';
+    final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
+    var existingProduct = _items[existingProductIndex];
+    http.delete(url).then((response) {
+      if (response.statusCode >= 400) {
+
+      }
+      existingProduct = null;
+     }).catchError((_) {
+      _items.insert(existingProductIndex, existingProduct);
+      notifyListeners();
+
+    });
+    _items.removeAt(existingProductIndex);
     notifyListeners();
+
   }
 }
