@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../screens/product_detail_screen.dart';
 import '../models/product.dart';
 import '../models/cart.dart';
+import '../providers/auth.dart';
 
 class ProcutcItem extends StatelessWidget {
   // final String id;
@@ -15,6 +16,7 @@ class ProcutcItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<Cart>(context, listen: false);
+    final authData = Provider.of<Auth>(context, listen: false);
 
     print('product rebuilds');
     return ClipRRect(
@@ -39,7 +41,7 @@ class ProcutcItem extends StatelessWidget {
               ),
               color: Theme.of(context).accentColor,
               onPressed: () {
-                product.toggleFavoriteStatus();
+                product.toggleFavoriteStatus(authData.token);
               },
             ),
           ),
